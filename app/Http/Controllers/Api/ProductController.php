@@ -21,9 +21,20 @@ class ProductController extends Controller
     {
         // Handling the process
         try {
+
+            // Get all catigories
+            $categories = DB::table('categories')->select(
+                'id',
+                'category_name as name',
+                'category_description as desc',
+                'product_quantity_in_category as p_quantity',
+            )->get();
+
+
             // Get all products
             $products = DB::table('products')->select(
                 'id',
+                        'category_id as c_id',
                         'product_name as name',
                         'product_description as desc',
                         'quantity',
@@ -39,6 +50,7 @@ class ProductController extends Controller
 
             // Return products
             return response()->json([
+                'categories'=>$categories,
                 'products' => $products,
                 'message' => __('Successfully retrieved products'),
             ], 200);
@@ -116,7 +128,7 @@ class ProductController extends Controller
             'product_description' => ['nullable', 'string', 'max:1000'],
             'quantity' => ['required', 'integer', 'min:1'],
             'price' => ['required', 'numeric', 'min:0.01'],
-            'product_img' => ['required','image', 'min:2048','mimes:jpeg,png,gif,bmp']
+            'product_img' => ['required','image','mimes:jpeg,png,gif,bmp']
         ]);
 
         // Handling the process
@@ -173,4 +185,43 @@ class ProductController extends Controller
         }
 
     }
+
+    /**
+     * This function is make serch requrement with product name and category name
+     * @param Request $request the input value for serch
+     * @return JsonResponse the resault of the serch process
+     */
+    public function search_process(Request $request)
+    {
+        // Get the serch input value
+        $search_input = $request->input('search_input');
+
+        // Get products who it name containes or category
+        // Pass arrow function to make query search in products names and return items
+        $search_items = Product::where(function ($query) use ($search_input) {
+
+            // If product name contianes  {$searchTerm} return it
+            $query->where('product_name','LIKE',"%$search_input%")
+
+                // Or if product description contianes  {$searchTerm} return it
+                ->orWhere('product_description', 'LIKE', "%$search_input");
+        })
+            // Or search in categories names and return items
+            ->orWhereHas('category', function ($query) use ($search_input) {
+                $query->where('category_name', 'LIKE', "%$search_input");
+            })
+            ->get();
+
+        if (!$search_items){
+            return response()->json([
+                'message'=>__('there no data')
+            ],404);
+        }
+
+        return response()->json([
+            'resulte' => $search_items,
+            'message' => __('items found')
+        ],200);
+    }
+
 }

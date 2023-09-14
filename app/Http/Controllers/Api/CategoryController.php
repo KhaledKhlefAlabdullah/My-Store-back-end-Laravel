@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use \Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\MockObject\Exception;
 
@@ -19,8 +20,14 @@ class CategoryController extends Controller
 
         // Handling the process
         try {
+
             // Get all catigories
-            $categories = Category::all();
+            $categories = DB::table('categories')->select(
+                'id',
+                'category_name as name',
+                'category_description as desc',
+                'product_quantity_in_category as p_quantity',
+                )->get();
 
             // Check if there are products
             if ($categories->isEmpty()) {
@@ -54,7 +61,7 @@ class CategoryController extends Controller
 
             // Validate inputs
             $request->validate([
-                'category_name' => ['required', 'string', 'max:255'],
+                'category_name' => ['required', 'string', 'max:10'],
                 'category_description' => ['nullable', 'string', 'max:1000'],
             ]);
 

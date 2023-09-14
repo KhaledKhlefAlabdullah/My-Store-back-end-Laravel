@@ -54,6 +54,7 @@ class OrdersController extends Controller
 
     /**
      * Get all orders belongs to on user in database
+     * @param string id is user is=d
      * @return JsonResponse all orders belongs to on user in database
      */
     public function user_orders(string $id){

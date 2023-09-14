@@ -29,15 +29,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('create-order',[OrdersController::class,'create_order'])->name('create-order');
 
+    Route::get('get-user-orders/{id}',[OrdersController::class,'user_orders'])->name('get-user-orders');
+
     Route::post('add-order-detail',[OrdersController::class,'add_order_details'])->name('add-order-detail');
 
     Route::post('edit-order-detail',[OrdersController::class,'update_order_detail'])->name('edit-order-detail');
 
 });
 
-Route::get('products',[ProductController::class,'index'])->name('products');
+Route::get('category-products',[ProductController::class,'index'])->name('category-products');
 
 Route::get('product-details/{id}',[ProductController::class,'product_details'])->name('product-details');
+
+Route::get('product-search',[ProductController::class,'search_process'])->name('product-search');
 
 Route::get('products_by_category',[ProductController::class,'category_products'])->name('products_by_category');
 
