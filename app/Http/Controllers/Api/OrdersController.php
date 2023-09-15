@@ -53,22 +53,58 @@ class OrdersController extends Controller
     }
 
     /**
+     * Get all orders in database
+     * @return JsonResponse all orders in database
+     */
+    public function get_order(Request $request)
+    {
+        // Handling the process
+        try {
+
+            $id = $request->id;
+
+            // Get all categories
+            $order = Orders::findOrFail($id);
+            // Check if there are products
+            if (!$order) {
+                return response()->json([
+                    'message' => __('No categories found'),
+                ], 404); // Use an appropriate HTTP status code for no data found
+            }
+
+            // Return products
+            return response()->json([
+                'order' => $order,
+                'message' => __('Successfully retrieved order'),
+            ], 200);
+
+        }catch (Exception $e){
+            return response()->json([
+                'message' => __('database connection error')
+            ], 500);
+        }
+
+    }
+
+    /**
      * Get all orders belongs to on user in database
      * @param string id is user is=d
-     * @return JsonResponse all orders belongs to on user in database
+     * @return JsonResponse all orders belonges to on user in database
      */
-    public function user_orders(string $id){
+    public function user_orders(Request $request){
 
         // Handling the process
         try {
 
+            $id = $request->id;
+
             // Get all categories
-            $orders = Orders::where('user_id', $id);
+            $orders = Orders::where('user_id', $id)->get();
 
             // Check if there are products
             if ($orders->isEmpty()) {
                 return response()->json([
-                    'message' => __('No categories found'),
+                    'message' => __('No orders found'),
                 ], 404); // Use an appropriate HTTP status code for no data found
             }
 
@@ -137,7 +173,7 @@ class OrdersController extends Controller
      * @return JsonResponse
      */
     public function add_order_details(array $order_detaile){
-// Handling the process
+        // Handling the process
         try {
             // Validate inputs
             $validate = Validator::make($order_detaile,[
@@ -214,7 +250,6 @@ class OrdersController extends Controller
                 'unit_price' => ['required', 'numeric', 'min:0.01'],
             ]);
 
-
             // Get the order or return a 404 response if not found
             $order_detail = Order_details::findOrFail($id);
 
@@ -242,4 +277,5 @@ class OrdersController extends Controller
             ], 500);
         }
     }
+
 }

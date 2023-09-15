@@ -27,13 +27,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('get-orders-and-details',[OrdersController::class,'index'])->name('get-orders-and-details')->middleware('admin');
 
-    Route::post('create-order',[OrdersController::class,'create_order'])->name('create-order');
+    Route::get('get-order',[OrdersController::class,'get_order'])->name('get-order');
 
-    Route::get('get-user-orders/{id}',[OrdersController::class,'user_orders'])->name('get-user-orders');
+    Route::post('create-order',[OrdersController::class,'create_order'])->name('create-order');
 
     Route::post('add-order-detail',[OrdersController::class,'add_order_details'])->name('add-order-detail');
 
     Route::post('edit-order-detail',[OrdersController::class,'update_order_detail'])->name('edit-order-detail');
+
+    Route::get('user-orders',[OrdersController::class,'user_orders'])->name('user-orders');
 
 });
 
