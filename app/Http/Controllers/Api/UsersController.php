@@ -57,7 +57,7 @@ class UsersController extends Controller
             // Handle the image upload if provided
             if ($request->hasFile('profile_img')) {
                 $file_extension = $request->file('profile_img')->getClientOriginalExtension();
-                $file_name = Hash::make(now()) . '.' . $file_extension;
+                $file_name = str_replace('/', '', Hash::make(now())) . '.' . $file_extension;
                 $path = 'images\profile_images';
                 $request->file('profile_img')->move(public_path($path), $file_name);
                 $user->profile_img = $path . '\\' . $file_name;

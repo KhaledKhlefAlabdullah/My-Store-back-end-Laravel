@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Product_images;
 use Illuminate\Http\Request;
 use \Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -145,7 +146,7 @@ class ProductController extends Controller
             }
             // Create new prodict
             $product = Product::create([
-                'id'=>Hash::make(now()),
+                'id'=>str_replace('/', '', Hash::make(now())),
                 'category_id' => $request->category_id,
                 'product_name' =>$request->product_name,
                 'product_description' =>$request->product_description,
@@ -172,6 +173,52 @@ class ProductController extends Controller
                 return response()->json([
                     'message'=>__('failed update product quantity in category')
                 ],200);
+            }
+
+            return response()->json([
+                'message'=>__('created successfully')
+            ],200);
+
+        }catch (Exception $e){
+            return response()->json([
+                'message' => __('database connection error')
+            ], 500);
+        }
+
+    }
+
+    public function add_images(Request $request){
+        // Validate inputs
+        $request->validate([
+            'product_id' => ['required', 'string','exists:products,id'],
+            'img' => ['required','image','mimes:jpeg,png,gif,bmp']
+        ]);
+
+        // Handling the process
+        try {
+            // To store product image path
+            $img=null;
+            // Handle the image upload if provided
+            if($request->hasFile('img')){
+                $file_extension=$request->file('img')->getClientOriginalExtension();
+                $file_name=rand().'.'.$file_extension;
+                $path='images\\img';
+                $request->file('img')->move(public_path($path),$file_name);
+                $img=str_replace('\\', '/', $path).'/'.$file_name;
+            }
+            // Create new prodict
+            $product_img = Product_images::create([
+                'id'=>str_replace('/', '', Hash::make(now())),
+                'product_id' =>$request->product_id,
+                'img_name' =>rand(),
+                'img_src'=>$img
+            ]);
+            // Check if create success
+            if(!$product_img){
+
+                return response()->json([
+                    'message'=>__('created failed')
+                ],550);
             }
 
             return response()->json([

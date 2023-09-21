@@ -23,6 +23,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('add-product',[ProductController::class,'store'])->name('add-product');
 
+    Route::post('add-image',[ProductController::class,'add_images'])->name('add-image');
+
     Route::post('add-category',[CategoryController::class,'store'])->name('add-category');
 
     Route::get('get-orders-and-details',[OrdersController::class,'index'])->name('get-orders-and-details')->middleware('admin');
@@ -36,6 +38,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('edit-order-detail',[OrdersController::class,'update_order_detail'])->name('edit-order-detail');
 
     Route::get('user-orders',[OrdersController::class,'user_orders'])->name('user-orders');
+
+    Route::delete('delete-order-details',[OrdersController::class,'remove_product_from_order'])->name('delete-order-details');
+
+    Route::delete('delete-order',[OrdersController::class,'remove_order'])->name('delete-order');
 
 });
 

@@ -20,6 +20,13 @@ class Product_images extends Model
 
     // The object attribute
 
+    protected $fillable =[
+      'id',
+      'product_id',
+      'img_name',
+      'img_src'
+    ];
+
     public function product(){
         return $this->belongsTo(Product::class);
     }

@@ -53,7 +53,7 @@ class OrdersController extends Controller
     }
 
     /**
-     * Get all orders in database
+     * Get specific orders in database
      * @return JsonResponse all orders in database
      */
     public function get_order(Request $request)
@@ -65,8 +65,10 @@ class OrdersController extends Controller
 
             // Get all categories
             $order = Orders::findOrFail($id);
+            $order_details = Order_details::where('order_id',$id)->with('product')->get();
+
             // Check if there are products
-            if (!$order) {
+            if (!$order_details || !$order) {
                 return response()->json([
                     'message' => __('No categories found'),
                 ], 404); // Use an appropriate HTTP status code for no data found
@@ -75,6 +77,7 @@ class OrdersController extends Controller
             // Return products
             return response()->json([
                 'order' => $order,
+                'order_details'=>$order_details,
                 'message' => __('Successfully retrieved order'),
             ], 200);
 
@@ -137,7 +140,7 @@ class OrdersController extends Controller
 
             // Create order
             $order = Orders::create([
-                'id' => Hash::make(now()),
+                'id' => str_replace('/', '', Hash::make(now())),
                 'title' => $request->title,
                 'user_id' => $request->user_id,
                 'total_price' => 0,
@@ -192,7 +195,7 @@ class OrdersController extends Controller
 
             // Create order details
             $order_detail = Order_details::create([
-                'id' => Hash::make(now()),
+                'id' => str_replace('/', '', Hash::make(now())),
                 'product_id' => $order_detaile['product_id'],
                 'order_id' => $order_detaile['order_id'],
                 'quantity' => $order_detaile['quantity'],
@@ -238,27 +241,28 @@ class OrdersController extends Controller
      * @param string $id order id
      * @return JsonResponse
      */
-    public function update_order_detail(Request $request, string $id)
+    public function update_order_detail(Request $request)
     {
         // Handling the process
         try {
             // Validate inputs
             $request->validate([
-                'product_id' => ['required', 'exists:products,id'],
-                'order_id' => ['required', 'exists:orders,id'],
                 'quantity' => ['required', 'integer', 'min:1'],
-                'unit_price' => ['required', 'numeric', 'min:0.01'],
             ]);
+
+            $id = $request->id;
 
             // Get the order or return a 404 response if not found
             $order_detail = Order_details::findOrFail($id);
 
-            // Update user with inputs
-            $order_detail->order_id = $request->order_id;
-            $order_detail->product_id = $request->product_id;
+            // Edite order details with inputs
             $order_detail->quantity = $request->quantity;
-            $order_detail->unit_price = $request->unit_price;
-            $order_detail->total_price = ($request->quantity * $request->unit_price);
+
+            $qunatity = $order_detail->quantity;
+
+            $unite_price = $order_detail->unit_price;
+
+            $order_detail->total_price = $qunatity * $unite_price;
 
             $state = $order_detail->save();
 
@@ -276,6 +280,60 @@ class OrdersController extends Controller
                 'message' => __('database connection error')
             ], 500);
         }
+    }
+
+    /**
+     * delete product from order
+     * @param Request $request order detail id
+     * @return JsonResponse
+     */
+    public function remove_product_from_order(Request $request){
+
+        if($request){
+
+            $id = $request->id;
+
+            $product_order = Order_details::findOrFail($id);
+
+            $product_order->delete();
+
+            return response()->json([
+                'message' => __('deleted successfully')
+                ],200);
+
+        }
+
+        return response()->json([
+            'message' => __('there some errors try again')
+        ],404);
+
+    }
+
+    /**
+     * delete product from order
+     * @param Request $request order detail id
+     * @return JsonResponse
+     */
+    public function remove_order(Request $request){
+
+        if($request){
+
+            $id = $request->id;
+
+            $order = Orders::findOrFail($id);
+
+            $order->delete();
+
+            return response()->json([
+                'message' => __('deleted successfully')
+            ],200);
+
+        }
+
+        return response()->json([
+            'message' => __('there some errors try again')
+        ],404);
+
     }
 
 }
